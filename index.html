@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Scoreboard Lomba Cerdas Cermat</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Background styling */
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background-image: url('assets/bg/background.png');
+      background-size: cover;
+      background-position: center center;
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+      font-family: "Georgia", serif;
+      color: white;
+      overflow-x: hidden;
+    }
+
+    /* Top bar for logos and heading */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 2rem;
+      backdrop-filter: blur(5px);
+      background-color: rgba(5, 20, 80, 0.60);
+      border-radius: 12px;
+      margin: 20px auto;
+      max-width: 1200px;
+      justify-content: center;
+      flex-wrap: wrap;
+      border: 1px solid rgba(212, 160, 23, 0.45);
+    }
+
+    .logos {
+      display: flex;
+      gap: 1rem;
+      background: rgba(255, 255, 255, 0.92);
+      padding: 0.6rem 1rem;
+      border-radius: 40px;
+      box-shadow: 0 0 12px rgba(212, 160, 23, 0.5);
+      flex-shrink: 0;
+    }
+
+    .logos img {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      object-fit: contain;
+    }
+
+    .heading-text {
+      flex: 1;
+      text-align: center;
+      font-weight: 600;
+      font-size: 1.1rem;
+      letter-spacing: 0.2em;
+      line-height: 1.3em;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.9), 0 0 20px rgba(212, 160, 23, 0.3);
+      user-select: none;
+      color: #ecf0f1;
+      /* Off-white yang lebih netral */
+    }
+
+    /* Scoreboard container with flex for teams */
+    .scoreboard-container {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 1rem;
+      /* Mengurangi gap agar muat 6 tim */
+      max-width: 1200px;
+      margin: 2rem auto 4rem auto;
+      padding: 1rem;
+      backdrop-filter: blur(6px);
+      background-color: rgba(5, 20, 80, 0.58);
+      border-radius: 16px;
+      flex-wrap: wrap;
+      /* Memungkinkan tim untuk wrap ke baris berikutnya */
+      border: 1px solid rgba(212, 160, 23, 0.45);
+    }
+
+    /* Each team card style */
+    .team-card {
+      background-color: rgba(8, 30, 110, 0.70);
+      width: 180px;
+      /* Mengurangi lebar kartu agar muat 6 dalam 1 baris */
+      border-radius: 15px;
+      box-shadow: 0 0 12px rgba(212, 160, 23, 0.4);
+      padding: 1rem;
+      /* Mengurangi padding */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      user-select: none;
+      position: relative;
+      transition: background-color 0.5s ease;
+      border: 1px solid rgba(212, 160, 23, 0.5);
+      flex-shrink: 0;
+      /* Mencegah kartu menyusut terlalu banyak */
+    }
+
+    /* Team name style */
+    .team-name {
+      font-family: "Georgia", serif;
+      font-size: 1.2rem;
+      /* Mengurangi ukuran font */
+      font-weight: 700;
+      color: #ecf0f1;
+      /* Off-white yang lebih netral */
+      margin-bottom: 0.8rem;
+      /* Mengurangi margin */
+      text-shadow: 1px 1px 5px #000;
+      /* Mengurangi shadow */
+      letter-spacing: 0.08em;
+      /* Mengurangi letter spacing */
+      /* user-select: none; <-- Dihapus agar nama tim bisa diedit */
+    }
+
+    /* Score number in large font */
+    .score-value {
+      font-family: "Georgia", serif;
+      font-size: 4rem;
+      /* Mengurangi ukuran font */
+      font-weight: 900;
+      margin: 0.8rem 0 1rem 0;
+      /* Mengurangi margin */
+      width: 100%;
+      text-align: center;
+      border-radius: 8px;
+      padding: 0.2rem 0;
+      /* Mengurangi padding */
+      transition: color 0.5s ease, background-color 0.5s ease;
+      user-select: text;
+      user-drag: none;
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.4) inset;
+    }
+
+    /* Buttons area under score */
+    .buttons-container {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      /* Mengurangi gap */
+      width: 100%;
+    }
+
+    /* Styling + or - point buttons */
+    button.score-btn {
+      flex: 1 1 48%;
+      /* Menyesuaikan agar 2 tombol dalam 1 baris */
+      background-color: #d4a017;
+      color: #ffffff;
+      border-radius: 6px;
+      /* Mengurangi border radius */
+      font-size: 1rem;
+      /* Mengurangi ukuran font */
+      font-weight: 700;
+      padding: 0.5rem 0;
+      /* Mengurangi padding */
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+      transition: background-color 0.3s ease;
+      user-select: none;
+    }
+
+    button.score-btn:hover {
+      background-color: #f0c040;
+    }
+
+    /* Reset button style */
+    button.reset-btn {
+      background-color: rgba(212, 160, 23, 0.9);
+      width: 100%;
+      margin-top: 0.8rem;
+      /* Mengurangi margin */
+      padding: 0.7rem 0;
+      /* Mengurangi padding */
+      border-radius: 10px;
+      /* Mengurangi border radius */
+      font-weight: 800;
+      font-size: 1rem;
+      /* Mengurangi ukuran font */
+      color: #ffffff;
+      border: none;
+      cursor: pointer;
+      user-select: none;
+      box-shadow: 0 0 8px rgba(212, 160, 23, 0.7);
+      /* Shadow yang lebih netral */
+      transition: background-color 0.4s ease;
+    }
+
+    button.reset-btn:hover {
+      background-color: #f0c040;
+    }
+
+    /* Timer container styling */
+    .timer-container {
+      max-width: 700px;
+      margin: 0 auto 3rem auto;
+      background-color: rgba(5, 20, 80, 0.58);
+      border-radius: 18px;
+      padding: 1.5rem 2rem 2rem 2rem;
+      /* Mengurangi padding */
+      box-shadow: 0 0 20px rgba(212, 160, 23, 0.6);
+      text-align: center;
+      font-family: "Georgia", serif;
+      user-select: none;
+      border: 1px solid rgba(212, 160, 23, 0.45);
+    }
+
+    .timer-display {
+      font-size: 4rem;
+      /* Mengurangi ukuran font */
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      /* Mengurangi letter spacing */
+      text-shadow: 0 0 15px #ffd700, 1px 1px 8px rgba(0,0,0,0.8);
+      /* Shadow yang lebih netral */
+      margin-bottom: 0.8rem;
+      /* Mengurangi margin */
+      color: #ecf0f1;
+      /* Off-white yang lebih netral */
+    }
+
+    /* Timer button styling */
+    .timer-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 0.8rem;
+      /* Mengurangi gap */
+      margin-bottom: 0.8rem;
+      /* Mengurangi margin */
+    }
+
+    .timer-button {
+      background-color: #d4a017;
+      border: none;
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 1rem;
+      /* Mengurangi ukuran font */
+      padding: 0.5rem 1.2rem;
+      /* Mengurangi padding */
+      border-radius: 8px;
+      /* Mengurangi border radius */
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      box-shadow: 0 0 8px rgba(212, 160, 23, 0.7);
+      user-select: none;
+    }
+
+    .timer-button:hover:not(:disabled) {
+      background-color: #f0c040;
+    }
+
+    .timer-button:disabled {
+      background-color: rgba(212, 160, 23, 0.3);
+      cursor: not-allowed;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    /* Timer set input container */
+    .timer-set {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.8rem;
+      /* Mengurangi gap */
+      font-weight: 600;
+      font-size: 1rem;
+      /* Mengurangi ukuran font */
+      margin-bottom: 0.4rem;
+      /* Mengurangi margin */
+      color: #ecf0f1;
+      /* Off-white yang lebih netral */
+      user-select: none;
+    }
+
+    input[type="number"] {
+      width: 60px;
+      /* Mengurangi lebar input */
+      font-size: 1.1rem;
+      /* Mengurangi ukuran font */
+      background-color: rgba(8, 30, 110, 0.70);
+      border: 2px solid #a0c4ff;
+      /* Border yang lebih netral */
+      border-radius: 6px;
+      /* Mengurangi border radius */
+      box-shadow: inset 0 0 5px rgba(160, 196, 255, 0.6);
+      color: #ecf0f1;
+      /* Off-white yang lebih netral */
+      text-align: center;
+      padding: 0.15rem;
+      /* Mengurangi padding */
+      font-weight: 700;
+    }
+
+    /* Score colors based on value */
+    .score-positive {
+      background-color: #27ae60;
+      /* Hijau yang lebih netral */
+      color: #ecf0f1;
+      box-shadow: 0 0 15px #2ecc71 inset;
+      /* Shadow hijau yang lebih netral */
+    }
+
+    .score-zero {
+      background-color: #7f8c8d;
+      /* Abu-abu yang lebih netral */
+      color: white;
+      box-shadow: inset 0 0 8px #95a5a6;
+      /* Shadow abu-abu yang lebih netral */
+    }
+
+    .score-negative {
+      background-color: #c0392b;
+      /* Merah yang lebih netral */
+      color: #ecf0f1;
+      box-shadow: 0 0 15px #e74c3c inset;
+      /* Shadow merah yang lebih netral */
+    }
+
+    /* Maskot container */
+    .maskot-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 2rem auto;
+      max-width: 250px;
+      /* Mengurangi ukuran maskot */
+    }
+
+    .maskot-container img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 15px;
+      box-shadow: 0 0 16px rgba(212, 160, 23, 0.6);
+    }
+
+    /* Responsive tweaks */
+    @media (max-width: 1200px) {
+      .scoreboard-container {
+        justify-content: center;
+        /* Pusatkan tim saat wrap */
+        gap: 1.5rem;
+        /* Menyesuaikan gap saat wrap */
+      }
+
+      .team-card {
+        width: 200px;
+        /* Menyesuaikan lebar kartu saat wrap */
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .scoreboard-container {
+        flex-direction: row;
+        /* Tetap dalam baris, tapi akan wrap */
+        align-items: flex-start;
+        gap: 1.5rem;
+      }
+
+      .team-card {
+        width: 200px;
+        /* Menyesuaikan lebar kartu */
+      }
+    }
+
+    @media (max-width: 768px) {
+      .top-bar {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .heading-text {
+        font-size: 1rem;
+      }
+
+      .logos {
+        margin-bottom: 1rem;
+      }
+
+      .team-card {
+        width: 90vw;
+        max-width: 300px;
+        /* Batasi lebar kartu pada layar kecil */
+      }
+
+      .timer-display {
+        font-size: 3rem;
+      }
+
+      .timer-button {
+        font-size: 0.9rem;
+        padding: 0.4rem 1rem;
+      }
+
+      .timer-set {
+        font-size: 0.9rem;
+      }
+
+      input[type="number"] {
+        width: 50px;
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Top bar with logos and heading -->
+  <header class="top-bar" aria-label="Header with university logos and heading">
+    <div class="logos" aria-label="Two official logos of Universitas Pendidikan Ganesha and related organizations">
+      <img src="logo/logo-undiksha.png" alt="Round official logo of Universitas Pendidikan Ganesha" />
+      <img src="logo/WhatsApp Image 2026-06-06 at 19.07.01.jpeg" alt="Round official logo of Fakultas Hukum dan Ilmu Sosial" />
+      <!-- Logo ketiga dihapus -->
+    </div>
+    <p class="heading-text" aria-label="Title and subtitle of the event or organizing body">
+      GEOSPHERE COMPETITION 2026<br />
+      HIMPUNAN MAHASISWA JURUSAN GEOGRAFI<br />
+      FAKULTAS HUKUM DAN ILMU SOSIAL<br />
+      UNIVERSITAS PENDIDIKAN GANESHA <br />
+    </p>
+  </header>
+
+  <!-- Maskot Section -->
+  <section class="maskot-container" aria-label="Maskot of the event">
+    <img src="logo/ChatGPT Image 6 Jun 2026, 20.23.04.png" alt="Gorilla Maskot" />
+  </section>
+
+  <!-- Scoreboard container for six teams -->
+  <main class="scoreboard-container" role="main" aria-label="Scoreboard for six teams in cerdas cermat competition">
+    <!-- Team 1 -->
+    <section class="team-card" aria-labelledby="team1-name" tabindex="0">
+      <h2 id="team1-name" class="team-name"> <span contenteditable="true">Tim A</span> </h2>
+      <div id="score1" class="score-value score-zero" aria-live="polite" aria-atomic="true" aria-label="Skor Tim A">0</div>
+      <div class="buttons-container">
+        <button class="score-btn" data-team="1" data-change="+5" aria-label="Tambah 5 poin Tim A">+5</button>
+        <button class="score-btn" data-team="1" data-change="+10" aria-label="Tambah 10 poin Tim A">+10</button>
+        <button class="score-btn" data-team="1" data-change="-5" aria-label="Kurangi 5 poin Tim A">-5</button>
+        <button class="score-btn" data-team="1" data-change="-10" aria-label="Kurangi 10 poin Tim A">-10</button>
+      </div>
+      <button class="reset-btn" data-team="1" aria-label="Reset skor Tim A ">Reset Skor</button>
+    </section>
+
+    <!-- Team 2 -->
+    <section class="team-card" aria-labelledby="team2-name" tabindex="0">
+      <h2 id="team2-name" class="team-name"> <span contenteditable="true">Tim B</span> </h2>
+      <div id="score2" class="score-value score-zero" aria-live="polite" aria-atomic="true" aria-label="Skor Tim B">0</div>
+      <div class="buttons-container">
+        <button class="score-btn" data-team="2" data-change="+5" aria-label="Tambah 5 poin Tim B">+5</button>
+        <button class="score-btn" data-team="2" data-change="+10" aria-label="Tambah 10 poin Tim B">+10</button>
+        <button class="score-btn" data-team="2" data-change="-5" aria-label="Kurangi 5 poin Tim B">-5</button>
+        <button class="score-btn" data-team="2" data-change="-10" aria-label="Kurangi 10 poin Tim B">-10</button>
+      </div>
+      <button class="reset-btn" data-team="2" aria-label="Reset skor Tim B ">Reset Skor</button>
+    </section>
+
+    <!-- Team 3 -->
+    <section class="team-card" aria-labelledby="team3-name" tabindex="0">
+      <h2 id="team3-name" class="team-name"> <span contenteditable="true">Tim C</span> </h2>
+      <div id="score3" class="score-value score-zero" aria-live="polite" aria-atomic="true" aria-label="Skor Tim C">0</div>
+      <div class="buttons-container">
+        <button class="score-btn" data-team="3" data-change="+5" aria-label="Tambah 5 poin Tim C">+5</button>
+        <button class="score-btn" data-team="3" data-change="+10" aria-label="Tambah 10 poin Tim C">+10</button>
+        <button class="score-btn" data-team="3" data-change="-5" aria-label="Kurangi 5 poin Tim C">-5</button>
+        <button class="score-btn" data-team="3" data-change="-10" aria-label="Kurangi 10 poin Tim C">-10</button>
+      </div>
+      <button class="reset-btn" data-team="3" aria-label="Reset skor Tim C ">Reset Skor</button>
+    </section>
+
+    <!-- Team 4 -->
+    <section class="team-card" aria-labelledby="team4-name" tabindex="0">
+      <h2 id="team4-name" class="team-name"> <span contenteditable="true">Tim D</span> </h2>
+      <div id="score4" class="score-value score-zero" aria-live="polite" aria-atomic="true" aria-label="Skor Tim D">0</div>
+      <div class="buttons-container">
+        <button class="score-btn" data-team="4" data-change="+5" aria-label="Tambah 5 poin Tim D">+5</button>
+        <button class="score-btn" data-team="4" data-change="+10" aria-label="Tambah 10 poin Tim D">+10</button>
+        <button class="score-btn" data-team="4" data-change="-5" aria-label="Kurangi 5 poin Tim D">-5</button>
+        <button class="score-btn" data-team="4" data-change="-10" aria-label="Kurangi 10 poin Tim D">-10</button>
+      </div>
+      <button class="reset-btn" data-team="4" aria-label="Reset skor Tim D ">Reset Skor</button>
+    </section>
+
+    <!-- Team 5 -->
+    <section class="team-card" aria-labelledby="team5-name" tabindex="0">
+      <h2 id="team5-name" class="team-name"> <span contenteditable="true">Tim E</span> </h2>
+      <div id="score5" class="score-value score-zero" aria-live="polite" aria-atomic="true" aria-label="Skor Tim E">0</div>
+      <div class="buttons-container">
+        <button class="score-btn" data-team="5" data-change="+5" aria-label="Tambah 5 poin Tim E">+5</button>
+        <button class="score-btn" data-team="5" data-change="+10" aria-label="Tambah 10 poin Tim E">+10</button>
+        <button class="score-btn" data-team="5" data-change="-5" aria-label="Kurangi 5 poin Tim E">-5</button>
+        <button class="score-btn" data-team="5" data-change="-10" aria-label="Kurangi 10 poin Tim E">-10</button>
+      </div>
+      <button class="reset-btn" data-team="5" aria-label="Reset skor Tim E ">Reset Skor</button>
+    </section>
+  </main>
+
+  <!-- Timer Section -->
+  <section class="timer-container" aria-label="Timer section for lomba cerdas cermat">
+    <div class="timer-display" id="timerDisplay" aria-live="polite" aria-atomic="true" role="timer" aria-label="Timer showing remaining time">00:00</div>
+
+    <div class="timer-set" aria-label="Set timer minutes and seconds">
+      <label for="minutesInput">Menit:</label>
+      <input type="number" id="minutesInput" aria-describedby="minutesHelp" min="0" max="59" value="3" />
+      <span id="minutesHelp" class="sr-only">Masukkan nilai menit antara 0 hingga 59</span>
+
+      <label for="secondsInput">Detik:</label>
+      <input type="number" id="secondsInput" aria-describedby="secondsHelp" min="0" max="59" value="0" />
+      <span id="secondsHelp" class="sr-only">Masukkan nilai detik antara 0 hingga 59</span>
+    </div>
+
+    <div class="timer-buttons">
+      <button id="startBtn" class="timer-button" aria-label="Mulai timer">Start</button>
+      <button id="stopBtn" class="timer-button" aria-label="Berhenti timer" disabled>Stop</button>
+      <button id="resetTimerBtn" class="timer-button" aria-label="Reset timer">Reset Timer</button>
+    </div>
+  </section>
+
+  <!-- Audio alarm for timer end -->
+  <audio id="alarmSound" preload="auto" aria-hidden="true">
+  <source src="soumd/bell.mp4" type="audio/mp4">
+</audio>
+
+  <script>
+    (() => {
+      // Scores object to store the current scores of the six teams
+      const scores = {
+        1: 0,
+        2: 0,
+        3: 0,
+        4: 0,
+        5: 0,
+      };
+
+      // Elements for scores and buttons
+      const scoreElements = {
+        1: document.getElementById("score1"),
+        2: document.getElementById("score2"),
+        3: document.getElementById("score3"),
+        4: document.getElementById("score4"),
+        5: document.getElementById("score5"),
+      };
+
+      // Update score display and change color accordingly
+      function updateScoreDisplay(team) {
+        let score = scores[team];
+        const el = scoreElements[team];
+        el.textContent = score;
+
+        // Remove all classes first
+        el.classList.remove("score-positive", "score-zero", "score-negative");
+        if (score > 0) {
+          el.classList.add("score-positive");
+        } else if (score < 0) {
+          el.classList.add("score-negative");
+        } else {
+          el.classList.add("score-zero");
+        }
+      }
+
+      // Add event listeners for scoring buttons
+      document.querySelectorAll(".score-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const team = btn.getAttribute("data-team");
+          const change = parseInt(btn.getAttribute("data-change"), 10);
+          scores[team] += change;
+          updateScoreDisplay(team);
+        });
+      });
+
+      // Reset buttons event listeners
+      document.querySelectorAll(".reset-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const team = btn.getAttribute("data-team");
+          scores[team] = 0;
+          updateScoreDisplay(team);
+        });
+      });
+
+      // Initialize all scores on load
+      [1, 2, 3, 4, 5].forEach((team) => updateScoreDisplay(team));
+    })();
+
+    // Timer functionality
+    (() => {
+      const timerDisplay = document.getElementById("timerDisplay");
+      const startBtn = document.getElementById("startBtn");
+      const stopBtn = document.getElementById("stopBtn");
+      const resetTimerBtn = document.getElementById("resetTimerBtn");
+      const alarmSound = document.getElementById("alarmSound");
+      const minutesInput = document.getElementById("minutesInput");
+      const secondsInput = document.getElementById("secondsInput");
+
+      let rafId = null;          // requestAnimationFrame id
+      let endTime = null;        // timestamp (ms) saat timer habis
+      let totalDuration = 0;     // total detik yang diset
+      let remainingSeconds = 0;
+      let timerRunning = false;
+      let alarmFired = false;
+
+      // Preload & unlock audio on first user interaction
+      // agar browser tidak blokir autoplay saat alarm berbunyi
+      function unlockAudio() {
+        alarmSound.load();
+        // Silent play lalu pause — membuka "audio context" browser
+        const unlockPlay = alarmSound.play();
+        if (unlockPlay !== undefined) {
+          unlockPlay.then(() => { alarmSound.pause(); alarmSound.currentTime = 0; }).catch(() => {});
+        }
+        document.removeEventListener('click', unlockAudio);
+      }
+      document.addEventListener('click', unlockAudio, { once: true });
+
+      // Format seconds to MM:SS
+      function formatTime(seconds) {
+        const s = Math.max(0, seconds);
+        const m = Math.floor(s / 60).toString().padStart(2, "0");
+        const sec = (s % 60).toString().padStart(2, "0");
+        return `${m}:${sec}`;
+      }
+
+      // Update the timer display
+      function updateDisplay() {
+        timerDisplay.textContent = formatTime(remainingSeconds);
+      }
+
+      // Real-time loop using requestAnimationFrame + Date.now()
+      function tick() {
+        if (!timerRunning) return;
+
+        const now = Date.now();
+        const msLeft = endTime - now;
+        const secsLeft = Math.ceil(msLeft / 1000);
+
+        // Hanya update display saat detik berubah (hemat render)
+        if (secsLeft !== remainingSeconds) {
+          remainingSeconds = secsLeft;
+          updateDisplay();
+        }
+
+        if (msLeft <= 0) {
+          // Timer habis — tepat waktu
+          remainingSeconds = 0;
+          updateDisplay();
+          timerRunning = false;
+          startBtn.disabled = false;
+          stopBtn.disabled = true;
+          minutesInput.disabled = false;
+          secondsInput.disabled = false;
+
+          if (!alarmFired) {
+            alarmFired = true;
+            alarmSound.currentTime = 0;
+            alarmSound.play().catch(() => {});
+          }
+          flashTimer();
+          return; // stop loop
+        }
+
+        rafId = requestAnimationFrame(tick);
+      }
+
+      // Start the timer
+      function startTimer() {
+        if (remainingSeconds <= 0) return;
+        if (timerRunning) return;
+
+        timerRunning = true;
+        alarmFired = false;
+        startBtn.disabled = true;
+        stopBtn.disabled = false;
+        minutesInput.disabled = true;
+        secondsInput.disabled = true;
+
+        // Hitung kapan timer habis berdasarkan waktu nyata
+        endTime = Date.now() + remainingSeconds * 1000;
+        rafId = requestAnimationFrame(tick);
+      }
+
+      // Stop/pause the timer
+      function stopTimer() {
+        if (!timerRunning) return;
+        cancelAnimationFrame(rafId);
+        timerRunning = false;
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+        minutesInput.disabled = false;
+        secondsInput.disabled = false;
+      }
+
+      // Reset the timer to custom input values
+      function resetTimer() {
+        stopTimer();
+        let mins = parseInt(minutesInput.value, 10);
+        let secs = parseInt(secondsInput.value, 10);
+        if (isNaN(mins) || mins < 0) mins = 0;
+        if (isNaN(secs) || secs < 0) secs = 0;
+        if (secs > 59) secs = 59;
+        if (mins > 59) mins = 59;
+
+        totalDuration = mins * 60 + secs;
+        remainingSeconds = totalDuration;
+        alarmFired = false;
+        updateDisplay();
+      }
+
+      // Dramatic flash timer background when time ends
+      function flashTimer() {
+        let flashes = 0;
+        const maxFlashes = 6;
+        const flashInterval = 400;
+        let isRed = false;
+
+        const originalColor = timerDisplay.style.color;
+        const originalShadow = timerDisplay.style.textShadow;
+
+        const interval = setInterval(() => {
+          isRed = !isRed;
+          if (isRed) {
+            timerDisplay.style.color = "#ff2200";
+            /* Bright red for flash */
+            timerDisplay.style.textShadow = "0 0 20px #ff3300, 0 0 30px #ff6600";
+          } else {
+            timerDisplay.style.color = originalColor;
+            timerDisplay.style.textShadow = originalShadow;
+          }
+
+          flashes++;
+          if (flashes > maxFlashes) {
+            clearInterval(interval);
+            timerDisplay.style.color = originalColor;
+            timerDisplay.style.textShadow = originalShadow;
+          }
+        }, flashInterval);
+      }
+
+      // Initialize timer on page load
+      resetTimer();
+
+      // Event listeners for timer buttons
+      startBtn.addEventListener("click", startTimer);
+      stopBtn.addEventListener("click", stopTimer);
+      resetTimerBtn.addEventListener("click", resetTimer);
+
+      // Input validation for minutes and seconds inputs
+      minutesInput.addEventListener("input", () => {
+        if (minutesInput.value === "" || isNaN(minutesInput.value) || minutesInput.value < 0)
+          minutesInput.value = 0;
+        else if (minutesInput.value > 59) minutesInput.value = 59;
+        if (!timerRunning) resetTimer();
+      });
+
+      secondsInput.addEventListener("input", () => {
+        if (secondsInput.value === "" || isNaN(secondsInput.value) || secondsInput.value < 0)
+          secondsInput.value = 0;
+        else if (secondsInput.value > 59) secondsInput.value = 59;
+        if (!timerRunning) resetTimer();
+      });
+    })();
+  </script>
+</body>
+
+</html>
